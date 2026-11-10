@@ -1,4 +1,4 @@
-# RNN Next-Word Prediction — DT086A Machine Learning
+# RNN Next-Word Prediction - DT086A Machine Learning
 
 Swedish news text dataset → LSTM model that predicts the **6th word** given 5 input words.
 
