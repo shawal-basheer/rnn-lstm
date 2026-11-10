@@ -20,10 +20,11 @@
 #   Loss           - how confident and correct the model is overall.
 #                    Lower = better.
 #
-# Why accuracy looks "low" but is actually good:
+# Why accuracy looks "low" but is actually reasonable:
 #   With 20 001 possible words, random guessing = 0.005% accuracy.
-#   Even 6-7% means the model is ~1400x better than random.
-#   More training epochs and more data would push this higher.
+#   The model reaches 13.5% Top-1, which is roughly 2 700x better
+#   than random. The main limits are the 50 000 sequence subsample
+#   and vocabulary sparsity, not the architecture.
 
 import os
 import pickle

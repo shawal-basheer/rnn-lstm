@@ -64,8 +64,8 @@ print(f"  Full train   : {len(X_train):,} sequences")
 # 2. Subsample to make training feasible on a CPU
 #    (remove this block if you have a GPU and more time)
 # ------------------------------------------------------------------
-SAMPLE_SIZE     = 50_000
-SAMPLE_SIZE_VAL = 5_000
+SAMPLE_SIZE     = 500_000
+SAMPLE_SIZE_VAL = 50_000
 
 np.random.seed(42)
 idx = np.random.choice(len(X_train), SAMPLE_SIZE, replace=False)
@@ -142,7 +142,7 @@ callbacks = [
 # ------------------------------------------------------------------
 print("\nStarting training ...")
 BATCH_SIZE = 512   # sequences processed before each weight update
-EPOCHS     = 10    # max passes through the training data
+EPOCHS     = 20    # max passes through the training data
 
 history = model.fit(
     X_tr, y_tr,

@@ -1,0 +1,6 @@
+*.npy
+*.pkl
+*.keras
+*.csv
+cleaned_corpus.txt
+.vscode/

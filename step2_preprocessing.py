@@ -31,9 +31,8 @@ CORPUS_FILE  = "cleaned_corpus.txt"
 SEQUENCE_LEN = 5      # how many words we feed in as input
 MAX_VOCAB    = 20000  # only keep the 20k most common words (keeps model manageable)
 
-# ------------------------------------------------------------------
 # 1. Read the cleaned corpus back in
-# ------------------------------------------------------------------
+
 print("Reading cleaned corpus ...")
 with open(CORPUS_FILE, "r", encoding="utf-8") as f:
     articles = f.readlines()
@@ -41,7 +40,6 @@ with open(CORPUS_FILE, "r", encoding="utf-8") as f:
 articles = [a.strip() for a in articles if a.strip()]
 print(f"  Articles loaded: {len(articles):,}")
 
-# ------------------------------------------------------------------
 # 2. Tokenize - give every unique word its own integer ID
 #
 # Why do we do this?
@@ -53,7 +51,7 @@ print(f"  Articles loaded: {len(articles):,}")
 # num_words=MAX_VOCAB means only the 20 000 most frequent words
 # get their own ID. Rare words (typos, one-off names) are ignored.
 # This keeps the vocabulary - and our model - a sensible size.
-# ------------------------------------------------------------------
+
 print("\nFitting tokenizer on corpus ...")
 tokenizer = Tokenizer(num_words=MAX_VOCAB, oov_token="<OOV>")
 tokenizer.fit_on_texts(articles)
@@ -62,12 +60,11 @@ vocab_size = min(MAX_VOCAB, len(tokenizer.word_index)) + 1
 print(f"  Total unique words in corpus : {len(tokenizer.word_index):,}")
 print(f"  Vocabulary size we will use  : {vocab_size:,}")
 
-# ------------------------------------------------------------------
 # 3. Build sequences
 #
 # For each article I slide a window of 6 words across the text.
 # First 5 words → X (input), 6th word → y (label/target).
-# ------------------------------------------------------------------
+
 print("\nBuilding sequences ...")
 X_raw = []
 y_raw = []
@@ -88,16 +85,15 @@ for article in articles:
 
 print(f"  Total sequences created: {len(X_raw):,}")
 
-# ------------------------------------------------------------------
 # 4. Convert to numpy arrays
 #
-# X shape: (num_sequences, 5)   - each row is 5 word IDs
-# y shape: (num_sequences, vocab_size) - one-hot encoded
+# X shape: (num_sequences, 5)  - each row is 5 word IDs
+# y shape: (num_sequences,)    - one integer per sequence, the target word ID
 #
-# One-hot encoding means if vocab_size=20001 and the target word
-# has ID 42, y becomes a vector of 20001 zeros with a 1 at index 42.
-# This is what categorical_crossentropy loss expects.
-# ------------------------------------------------------------------
+# I keep y as plain integers rather than one-hot vectors, for the
+# memory reason explained at the top of this file. The model uses
+# sparse_categorical_crossentropy, which takes integer labels directly.
+
 print("\nConverting to numpy arrays ...")
 X = np.array(X_raw, dtype=np.int32)
 y = np.array(y_raw, dtype=np.int32)  # sparse integer IDs, not one-hot
@@ -105,7 +101,6 @@ y = np.array(y_raw, dtype=np.int32)  # sparse integer IDs, not one-hot
 print(f"  X shape: {X.shape}  (sequences × window_size)")
 print(f'  y shape: {y.shape}  (one integer per sequence = target word ID)')
 
-# ------------------------------------------------------------------
 # 5. Train / Validation / Test split
 #
 # I split the data into three parts:
@@ -114,7 +109,7 @@ print(f'  y shape: {y.shape}  (one integer per sequence = target word ID)')
 #   10% test       - final evaluation, model never sees this during training
 #
 # random_state=42 just makes the split reproducible every time I run it.
-# ------------------------------------------------------------------
+
 print("\nSplitting into train / val / test ...")
 
 X_train, X_temp, y_train, y_temp = train_test_split(
@@ -128,12 +123,11 @@ print(f"  Train      : {X_train.shape[0]:>10,} sequences")
 print(f"  Validation : {X_val.shape[0]:>10,} sequences")
 print(f"  Test       : {X_test.shape[0]:>10,} sequences")
 
-# ------------------------------------------------------------------
 # 6. Save everything so step 3 can just load it
 #
 # I save the tokenizer as a pickle file so I don't have to rebuild
 # the vocabulary from scratch every time I train or run a prediction.
-# ------------------------------------------------------------------
+
 print("\nSaving preprocessed data ...")
 
 np.save("X_train.npy", X_train)
@@ -155,16 +149,16 @@ print("  Saved: y_train/val/test.npy")
 print("  Saved: tokenizer.pkl")
 print("  Saved: vocab_size.txt")
 
-# ------------------------------------------------------------------
 # 7. Quick sanity check - decode a sequence back to words
-#
-# Just to verify everything looks right before moving on.
-# ------------------------------------------------------------------
+
+# y is stored as a plain integer word ID, so I can look it up
+# directly in the reverse dictionary.
+
 print("\n── Sanity check: decoding first sequence back to words ──")
 id_to_word = {v: k for k, v in tokenizer.word_index.items()}
 
 sample_X = X_train[0]
-sample_y = np.argmax(y_train[0])
+sample_y = y_train[0]
 
 input_words  = [id_to_word.get(idx, "?") for idx in sample_X]
 target_word  = id_to_word.get(sample_y, "?")

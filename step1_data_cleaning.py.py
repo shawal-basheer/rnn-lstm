@@ -33,7 +33,7 @@ import re
 import pandas as pd
 
 # 1. Load raw data
-CSV_PATH = "../text-ds.csv"          # adjust if you run from a different folder
+CSV_PATH = "text-ds.csv"          # adjust if you run from a different folder
 OUTPUT_PATH = "cleaned_corpus.txt"
 
 print("Loading dataset …")
